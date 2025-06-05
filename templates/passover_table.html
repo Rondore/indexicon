@@ -1,0 +1,15 @@
+<div class="passovers">
+    <h2>Source Passover Directories</h2>
+    <table class="passover-table">
+        <tr class="admin-passover-header">
+            <th>ID</th>
+            <th>Directory</th>
+            <th>Actions</th>
+        <tr>
+        {{ entries|safe }}
+    </table>
+    <form method="post">
+        Add passover directory (full URL):
+        <input type="text" name="passover-addition"></input>
+    </form>
+</div><br>

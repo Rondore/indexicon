@@ -1,0 +1,33 @@
+<tr class="admin-source {% if not enabled %}disabled-admin-row{% endif %}">
+    <td class="id">{{ id }}</td>
+    <td class="url">{{ url }}</td>
+    <td class="flex-breaker"></td>
+    <td class="last-scrape">{{ age }}</td>
+    <td class="is-enabled">{% if enabled %}Enabled{% else %}Disabled{% endif %}</td>
+    <td class="count">{{ count }}</td>
+    <td class="flex-breaker"></td>
+    <td class="source-action source-action-td action-td">
+        <form method="post" class="inline-block{% if enabled %} disabled-action{% endif %}">
+            <input type="hidden" name="enable" value="{{ id }}"></input>
+            <{% if not enabled %}button{% else %}div<{% endif %} type="submit" class="admin-action admin-enable">
+                <i class="fa fa-check-square" aria-hidden="true" title="Enable"></i>
+            </{% if not enabled %}button{% else %}div<{% endif %}>
+        </form>
+        <form method="post" class="inline-block{% if not enabled %} disabled-action{% endif %}">
+            <input type="hidden" name="disable" value="{{ id }}"></input>
+            <{% if enabled %}button{% else %}div<{% endif %} type="submit" class="admin-action admin-disable">
+                <i class="fa fa-minus-square" aria-hidden="true" title="Disable"></i>
+            </{% if enabled %}button{% else %}div<{% endif %}>
+        </form>
+        <form method="post" class="inline-block">
+            <input type="hidden" name="delete" value="{{ id }}"></input>
+            <button type="submit" class="admin-action admin-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete"></i></button>
+        </form>
+        <form method="post" class="inline-block{% if running %} disabled-action{% endif %}">
+            <input type="hidden" name="scrape" value="{{ id }}"></input>
+            <{% if not running %}button{% else %}div<{% endif %} type="submit" class="admin-action admin-sync">
+                <i class="fa fa-refresh" aria-hidden="true" title="Scrape source"></i>
+            </{% if not running %}button{% else %}div<{% endif %}>
+        </form>
+    </td>
+</tr>

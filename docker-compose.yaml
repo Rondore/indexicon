@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  indexicon:
+    image: rondore/indexicon:latest
+    hostname: indexicon
+    container_name: indexicon
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - "/home/user/.config/indexicon/addon:/usr/src/app/addon"
+      - "/home/user/.config/indexicon/data:/usr/src/app/data"
+    restart: always
+    environment:
+      INDEXICON_DB_TYPE: "sqlite"
+      INDEXICON_EXTENSIONS: ""

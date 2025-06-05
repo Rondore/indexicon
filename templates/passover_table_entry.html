@@ -1,0 +1,10 @@
+<tr class="admin-passover">
+    <td>{{ id }}</td>
+    <td>{{ url }}{{ directory }}</td>
+    <td class="passover-action-td action-td">
+        <form method="post" class="inline-block">
+            <input type="hidden" name="passover-delete" value="{{ id }}"></input>
+            <button type="submit" class="admin-action passover-action admin-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete"></i></button>
+        </form>
+    </td>
+</tr>

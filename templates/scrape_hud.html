@@ -1,0 +1,14 @@
+<div class="status">
+        Scan Status: {{text_status}}
+        {% if scrape_status != 0 %}
+            <pre>{{ sample }}</pre>
+        {% else %}
+            <form style="display: inline-block;" method="post">
+				<input type="hidden" name="scrape" value="-1"></input>
+				<button type="submit">
+					<i class="fa fa-refresh" aria-hidden="true"></i>
+					Start
+				</button>
+			</form>
+        {% endif %}
+    </div><br>

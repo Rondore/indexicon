@@ -1,0 +1,21 @@
+<div class="sources">
+    <h2>Sources</h2>
+    <table class="source-table">
+        <tr class="admin-source-header">
+            <th class="id">ID</th>
+            <th class="url">URL</th>
+            <th class="flex-breaker"></th>
+            <th class="last-scrape">Last Scrape</th>
+            <th class="is-enabled">Enabled</th>
+            <th class="count">File Count</th>
+            <th class="flex-breaker"></th>
+            <th class="source-action">Actions</th>
+        </tr>
+        {{ entries|safe }}
+    </table>
+    <div total="">Total Files: {{ count }}</div>
+    <form method="post">
+        Add new source:
+        <input type="text" name="addition"></input>
+    </form>
+</div><br>
