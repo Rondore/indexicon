@@ -3,6 +3,7 @@
 .vscode/
 .git/
 .gitignore
+.github/
 addon/*
 data/*
 docker-compose.yaml
