@@ -62,7 +62,7 @@ def environment_variable(name: str, fallback: str) -> str:
 
 def environment_variable_list(name: str, fallback: list[str]) -> list[str]:
     full_name = 'INDEXICON_' + name
-    if hasattr(os.environ, full_name):
+    if full_name in os.environ:
         string_as_list = os.environ[full_name]
         return string_as_list.split('|')
     else:
