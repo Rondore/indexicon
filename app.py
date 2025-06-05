@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from logs.file_log import FileLogger
 import util
 import settings
 import html
@@ -15,7 +16,7 @@ db = database.backend
 
 app = Flask(__name__)
 
-scraper = Scraper(None)
+scraper = Scraper(FileLogger('scrape'))
 
 def header(page_name: str, extra_elements: list[str] = []) -> str:
     """
