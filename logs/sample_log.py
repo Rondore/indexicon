@@ -35,3 +35,7 @@ class SampleLogger(log.Logger):
             if at >= self.size:
                 at = 0
         return output
+    
+    def reset(self):
+        self.current_size = 0
+        self.cursor = 0

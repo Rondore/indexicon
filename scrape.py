@@ -135,6 +135,7 @@ class Scraper:
     def start(self, source=-1) -> bool:
         if self.thread != None and self.thread.is_alive():
             return False
+        self.sample_logger.reset()
         self.source = source
         self.thread = Thread(target=full_scrape, args=(source, self.logger))
         self.thread.start()
