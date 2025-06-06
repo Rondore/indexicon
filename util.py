@@ -55,7 +55,7 @@ def format_number(number: int) -> str:
 
 def environment_variable(name: str, fallback: str) -> str:
     full_name = 'INDEXICON_' + name
-    if hasattr(os.environ, full_name):
+    if full_name in os.environ:
         return os.environ[full_name]
     else:
         return fallback
