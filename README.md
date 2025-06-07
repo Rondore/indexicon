@@ -1,6 +1,6 @@
 # About
 
-Indexicon is a tool to building an index of files in open directories (ODs). ODs are also known as *index of* webpages since they often have a page titile like *Index of "/"*. ODs can contain all sorts of files
+Indexicon is a tool to building an index of files in open directories (ODs). ODs are also known as *index of* webpages since they often have a page title like *Index of "/"*. ODs can contain all sorts of files
 
 # Installing
 
