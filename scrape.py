@@ -12,7 +12,7 @@ from db import database
 from bs4 import BeautifulSoup
 from threading import Thread
 
-db = database.backend
+db = database.get_db()
 
 custom_headers = {
     'User-Agent': settings.user_agent,
@@ -95,27 +95,10 @@ def get_full_url(page, link):
         return protocol + '://' + domain + link
     return page + link
 
-def full_scrape(source_id=-1, logger: Logger=FileLogger('scrape')):
-    force = source_id != -1
-    def scrape_single(id: int, url: str, age: int, enabled: bool):
-        id = int(id)
-        age = int(age)
-        logger.log("Starting " + str(id) + ": " + url)
-        if not force and age < settings.min_age:
-            logger.log("Scape too recent, skipping " + url)
-            return
-        passovers = db.get_passovers(id, url)
-        db.purge_source(id)
-        logger.log("Cleared " + str(id))
-        try:
-            scrape_url(logger, id, url, passovers)
-        except requests.exceptions.ConnectionError:
-            logger.log("Failed to scrape " + str(id) + ": " + url)
-    db.for_each_source(source_id, scrape_single)
-    db.commit()
-
 class Scraper:
     thread: (Thread | None)
+    queue: list[int]
+    logger: Logger
 
     def __init__(self, logger: (Logger|None)):
         self.sample_logger = SampleLogger(10)
@@ -124,36 +107,77 @@ class Scraper:
         else:
             self.logger = CompoundLogger()
             self.logger.add_log(self.sample_logger)
-        self.source = -1
         self.thread = None
+        self.queue = []
 
     def status(self):
         if self.thread != None and self.thread.is_alive():
             return 1
         return 0
     
-    def start(self, source=-1) -> bool:
+    def start(self) -> bool:
         if self.thread != None and self.thread.is_alive():
             return False
         self.sample_logger.reset()
-        self.source = source
-        self.thread = Thread(target=full_scrape, args=(source, self.logger))
+        self.thread = Thread(target=_run_scrape, args=(self,))
         self.thread.start()
         return True
     
     def sample(self) -> str:
         return self.sample_logger.get_sample()
+    
+    def add_source(self, id: int) -> bool:
+        addon_ids = []
+        if id == -1:
+            for source_id in db.get_due_source_ids():
+                addon_ids.append(source_id)
+        else:
+            addon_ids.append(id)
+        added = False
+        for source_id in addon_ids:
+            if source_id not in self.queue:
+                self.queue.append(source_id)
+                added = True
+        return added
+
+    def scrape(self, id: int) -> bool:
+        added = False
+        added = self.add_source(id)
+        if self.thread is None or not self.thread.is_alive():
+            self.start()
+        return added
+
+def _run_scrape(scraper: Scraper):
+    while len(scraper.queue) > 0:
+        target_id = scraper.queue[0]
+        url, age, enabled = db.get_source_info(target_id)
+        scraper.logger.log("Starting " + str(id) + ": " + url)
+        passovers = db.get_passovers(target_id, url)
+        db.purge_source(target_id)
+        scraper.logger.log("Cleared " + str(target_id))
+        try:
+            scrape_url(scraper.logger, target_id, url, passovers)
+        except requests.exceptions.ConnectionError:
+            scraper.logger.log("Failed to scrape " + str(target_id) + ": " + url)
+        scraper.queue.remove(target_id)
+        db.commit()
 
 if __name__ == '__main__':
     count = len(sys.argv)
     logger = CompoundLogger()
     logger.add_log(TerminalLogger())
     logger.add_log(FileLogger('scrape'))
+    scrape_id = -2
     if count > 1:
         target = sys.argv[1]
         if target.isdigit():
-            full_scrape(int(target), logger)
+            scrape_id = int(target)
         else:
             pass
     else:
-        full_scrape(-1, logger)
+        scrape_id = -1
+    if scrape_id != -2:
+        scraper = Scraper(logger)
+        scraper.scrape(scrape_id)
+        if scraper.thread:
+            scraper.thread.join()

@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from typing import Callable
 from mysql.connector.cursor import MySQLCursor
 from sqlite3 import Cursor as SQLiteCursor
+from mariadb.cursors import Cursor as MariaCursor
+import settings
 
 import util
 
@@ -16,7 +18,7 @@ class DbBackend(ABC):
         pass
 
     @abstractmethod
-    def get_cursor(self) -> (MySQLCursor | SQLiteCursor):
+    def get_cursor(self) -> (MySQLCursor | SQLiteCursor | MariaCursor):
         pass
 
     @abstractmethod
@@ -24,7 +26,11 @@ class DbBackend(ABC):
         pass
 
     @abstractmethod
-    def execute_and_return(self, query: str, values=()) -> (MySQLCursor | SQLiteCursor):
+    def execute_and_return(self, query: str, values=()) -> (MySQLCursor | SQLiteCursor | MariaCursor):
+        pass
+    
+    @abstractmethod
+    def close(self):
         pass
 
     def update_scrape_stamp(self, id: int) -> None:
@@ -55,30 +61,25 @@ class DbBackend(ABC):
     def commit(self) -> None:
         pass
     
-    def for_each_source(self, id: int, function: Callable[[int, str, int, bool], None], only_enabled=True) -> int:
+    def get_source_info(self, id: int) -> tuple[str, int, bool]:
         cursor = self.get_cursor()
-        query = 'SELECT `s_id`, `s_url`, ( ' + self.unix_time() + ' - `s_last_crawl` ) AS age, s_enabled FROM `source`'
+        query = 'SELECT `s_url`, ( ' + self.unix_time() + ' - `s_last_crawl` ) AS age, s_enabled FROM `source`'
         where_list = WhereList()
-        if only_enabled:
-            where_list.add('s_enabled=1')
         if id != -1:
             where_list.add('s_id=' + str(id))
         query += where_list.compile() + ';'
+        url = ''
+        age = 0
+        enabled = True
         cursor.execute(query)
-        total = 0
-        while True:
-            rows: list = cursor.fetchmany(20)
-            if not rows:
-                break
-            for id, url, age, enabled in rows:
-                total += 1
-                id = int(id)
-                url = str(url)
-                age = int(age)
-                enabled = bool(enabled)
-                function(id, url, age, enabled)
+        row = cursor.fetchone()
+        print(row)
+        if row:
+            url = str(row[0])
+            age = int(str(row[1]))
+            enabled = get_bool(row[2])
         cursor.close()
-        return total
+        return (url, age, enabled)
     
     def for_each_source_with_count(self, id: int, function: Callable[[int, str, int, bool, int], None], only_enabled=True) -> int:
         cursor = self.get_cursor()
@@ -101,7 +102,7 @@ class DbBackend(ABC):
                 id = int(id)
                 url = str(url)
                 age = int(age)
-                enabled = bool(enabled)
+                enabled = get_bool(enabled)
                 clean_count = 0
                 if count is not None:
                     clean_count = int(count)
@@ -220,6 +221,24 @@ class DbBackend(ABC):
         self.execute_and_close('UPDATE source SET `s_enabled`=0 WHERE `s_id`=' + standin + ';', (id,))
         self.commit()
 
+    def get_due_source_ids(self):
+        cursor = self.get_cursor()
+        query = 'SELECT `s_id` FROM `source`'
+        where_list = WhereList()
+        where_list.add('s_enabled=1')
+        where_list.add('( ' + self.unix_time() + ' - `s_last_crawl` ) > ' + str(settings.min_age))
+        query += where_list.compile() + ';'
+        cursor.execute(query)
+        id_list: list[int] = []
+        while True:
+            rows: list = cursor.fetchmany(20)
+            if not rows:
+                break
+            for row in rows:
+                id_list.append(int(row[0]))
+        cursor.close()
+        return id_list
+
 class WhereList:
     def __init__(self):
         self.list: list[str] = []
@@ -240,3 +259,11 @@ def get_search_array( search_string ) -> list[str]:
         if( len( term ) > 0 ):
             words.append(term)
     return words
+
+def get_bool(input) -> bool:
+    if input == b'\x01':
+        return True
+    elif input == b'\x00':
+        return False
+    else:
+        return bool(input)

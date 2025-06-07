@@ -60,6 +60,13 @@ def environment_variable(name: str, fallback: str) -> str:
     else:
         return fallback
 
+def environment_variable_int(name: str, fallback: int) -> int:
+    full_name = 'INDEXICON_' + name
+    if full_name in os.environ:
+        return int(os.environ[full_name])
+    else:
+        return fallback
+
 def environment_variable_list(name: str, fallback: list[str]) -> list[str]:
     full_name = 'INDEXICON_' + name
     if full_name in os.environ:

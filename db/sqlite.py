@@ -52,3 +52,7 @@ class SqLite(DbBackend):
 
     def get_cursor(self) -> Cursor:
         return self.db.cursor()
+    
+    def close(self):
+        # self.db.close()
+        pass

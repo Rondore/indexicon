@@ -13,9 +13,9 @@ def get_new_connection():
     user = settings.db_user
     password = settings.db_password
     database = settings.db_db
-    return connector.connect(host=host, user=user, password=password, database=database)
+    return connector.connect(host=host, user=user, password=password, database=database, pool_name="indexicon", pool_size=settings.db_pool)
 
-class Maria(DbBackend):
+class MySql(DbBackend):
     def __init__(self):
         self.db = get_new_connection()
 
@@ -39,4 +39,9 @@ class Maria(DbBackend):
         return 'UNIX_TIMESTAMP()'
 
     def get_cursor(self) -> MySQLCursor:
+        if not self.db.is_connected():
+            self.db.reconnect()
         return self.db.cursor(buffered=True)
+    
+    def close(self):
+        self.db.close()

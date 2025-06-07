@@ -31,6 +31,7 @@ INDEXICON_DB_DB        db_db
 INDEXICON_DB_USER      db_user
 INDEXICON_DB_PASSWORD  db_password
 INDEXICON_DB_HOST      db_host
+INDEXICON_DB_POOL
 
 INDEXICON_NAME         name
 INDEXICON_INTERNAL_URL internal_base_url
@@ -103,6 +104,7 @@ settings.db_db = 'indexicon'
 settings.db_user = 'indexicon'
 settings.db_password = 'bad_password'
 settings.db_host = '192.168.0.1'
+settings.db_pool = 5
 
 settings.name = 'Indexicon'
 settings.local_base_url = "/"
@@ -124,7 +126,7 @@ Indexicon can use either SQLite or MariaDB/MySQL to store persistent data.
 
 ### `db_db`
 
-Setting this value to 'maria', 'mariadb', or 'mysql' will switch Indexicon to use MariaDB/MySQL. All MariaDB/MySQL values will work the same. Any other value set for `db_db` will cause Indexicon to use SQLite.
+Setting this value to 'maria' or 'mariadb' will switch Indexicon to use MariaDB. Using 'mysql' will switch Indexicon to use MySQL. Any other value set for `db_db` will cause Indexicon to use SQLite.
 
 ### `db_user`
 
@@ -137,6 +139,10 @@ When using MariaDB/MySQL, this value is the password to use to log into the data
 ### `db_host`
 
 When using MariaDB/MySQL, this value is the server hostname to use to access the database.
+
+### `db_pool`
+
+The number of connections in the MariaDB/MySQL connection pool. Increase this value if you run into "pool exhausted" errors.
 
 ## Other Options
 

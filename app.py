@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from db.db_backend import DbBackend
 from logs.file_log import FileLogger
 import util
 import settings
@@ -11,8 +12,6 @@ from markupsafe import escape
 from flask import request
 from urllib.parse import unquote
 from os import path
-
-db = database.backend
 
 app = Flask(__name__)
 
@@ -73,7 +72,7 @@ def scrape_hud() -> str:
     status = scraper.status()
     text_status = 'Ready'
     if status > 0:
-        text_status = 'Scraping ID ' + str(status)
+        text_status = 'Scraping ID ' + str(scraper.queue[0])
     elif status == -1:
         text_status = 'Scraping all sources'
     sample = ''
@@ -81,7 +80,7 @@ def scrape_hud() -> str:
         sample = scraper.sample()
     return render_template('scrape_hud.html', text_status=text_status, scrape_status=status, sample=sample)
 
-def source_table() -> str:
+def source_table(db: DbBackend) -> str:
     total = 0
     entries = ''
     status = scraper.status()
@@ -92,11 +91,11 @@ def source_table() -> str:
         pretty_age = util.pretty_age(age)
         if pretty_age != 'never':
             pretty_age += ' ago'
-        entries += render_template('source_table_entry.html', id=id, url=url, age=pretty_age, enabled=enabled, count=count, running=status!=0)
+        entries += render_template('source_table_entry.html', id=id, url=url, age=pretty_age, enabled=enabled, count=count, running=id in scraper.queue)
     db.for_each_source_with_count(-1, add_entry, False)
     return render_template('source_table.html', count=util.format_number(total), entries=entries)
 
-def passover_table() -> str:
+def passover_table(db: DbBackend) -> str:
     entries = ''
     def add_entry(id: int, url: str, directory: str):
         nonlocal entries
@@ -106,6 +105,7 @@ def passover_table() -> str:
 
 @app.route("/")
 def home():
+    db = database.get_db()
     search_content = ''
     search = request.args.get('search', '')
     encoded_search = str(escape(search))
@@ -124,6 +124,7 @@ def home():
     output += nav()
     output += search_content
     output += footer()
+    db.close()
     return output
 
 def start_scrape(raw_id: str):
@@ -131,16 +132,16 @@ def start_scrape(raw_id: str):
         id = int(raw_id)
     else:
         id = -1
-    start = scraper.start(id)
+    start = scraper.scrape(id)
     if start:
         return 'Started Scrape'
-    return 'Scrape already in progress'
+    return 'Scrape of source already in progress'
 
-def add_source(url: str):
+def add_source(url: str, db: DbBackend):
     db.add_source(url)
     return 'Added source ' + html.escape(url)
 
-def add_passover(url: str):
+def add_passover(url: str, db: DbBackend):
     if not url.startswith('http'):
         return 'Please include the full URL'
     if not url.endswith('/'):
@@ -148,59 +149,61 @@ def add_passover(url: str):
     db.add_passover(url)
     return 'Added passover ' + html.escape(url)
 
-def delete_source(raw_id: str):
+def delete_source(raw_id: str, db: DbBackend):
     id = int(raw_id)
     url = db.delete_source(id)
     return 'Deleted source ' + html.escape(url)
 
-def delete_passover(raw_id: str):
+def delete_passover(raw_id: str, db: DbBackend):
     id = int(raw_id)
     source_url, directory = db.delete_passover(id)
     url = source_url + directory
     return 'Deleted passover ' + html.escape(url)
 
-def enable_source(raw_id: str):
+def enable_source(raw_id: str, db: DbBackend):
     id = int(raw_id)
     db.enable_source(id)
     return 'Enabled ' + str(id)
 
-def disable_source(raw_id: str):
+def disable_source(raw_id: str, db: DbBackend):
     id = int(raw_id)
     db.disable_source(id)
     return 'Disabled ' + str(id)
 
-def process_admin_post(form) -> str:
+def process_admin_post(form, db: DbBackend) -> str:
     if 'scrape' in form:
         return start_scrape(form['scrape'])
     elif 'addition' in form:
-        return add_source(form['addition'])
+        return add_source(form['addition'], db)
     elif 'passover-addition' in request.form:
-        return add_passover(form['passover-addition'])
+        return add_passover(form['passover-addition'], db)
     elif 'delete' in form:
-        return delete_source(form['delete'])
+        return delete_source(form['delete'], db)
     elif 'passover-delete' in request.form:
-        return delete_passover(form['passover-delete'])
+        return delete_passover(form['passover-delete'], db)
     elif 'enable' in form:
-        return enable_source(form['enable'])
+        return enable_source(form['enable'], db)
     elif 'disable' in form:
-        return disable_source(form['disable'])
+        return disable_source(form['disable'], db)
     return ''
 
 @app.route("/admin", methods=['GET', 'POST'])
 def admin():
+    db = database.get_db()
     output = ''
     action_message = ''
     if request.method == 'POST':
-        action_message = process_admin_post(request.form)
+        action_message = process_admin_post(request.form, db)
     output = header('Admin', ['<link rel="stylesheet" type="text/css" href="static/fonts/font-awesome.css">'])
     output += '<h1>' + settings.name + ' Admin</h1>'
     output += nav()
     output += scrape_hud()
     if len(action_message) > 0:
         output += '<div class="action-message">' + action_message + '</div><br>'
-    output += source_table()
-    output += passover_table()
+    output += source_table(db)
+    output += passover_table(db)
     output += footer()
+    db.close()
     return output
 
 def search_other_default(raw_search: str) -> str:
