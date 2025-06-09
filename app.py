@@ -118,7 +118,7 @@ def home():
         count = db.search_db(search, get_search_entry_html)
         if count > 0:
             search_content = '<div class="result-header">Found ' + str(count) + ' files</div>' + search_content
-            search_content += search_other(search)
+        search_content += search_other(search)
     output = header('')
     output += render_template('search.html', indexicon_name=settings.name, results = encoded_search)
     output += nav()
