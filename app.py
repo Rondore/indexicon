@@ -207,7 +207,7 @@ def admin():
     return output
 
 def search_other_default(raw_search: str) -> str:
-    plus_search = raw_search.replace(' ', '+').replace('"', '\"')
+    plus_search = raw_search.replace(' ', '+')
     google_search = "https://www.google.com/search?udm=14&q=" + plus_search
     return render_template('search_other.html', google_search=google_search)
 
