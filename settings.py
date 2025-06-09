@@ -3,6 +3,13 @@
 from os import path
 from util import environment_variable, environment_variable_int, environment_variable_list
 
+def clean_uri_path(path: str) -> str:
+    if not path.startswith('/'):
+        path = '/' + path
+    if not path.endswith('/'):
+        path = path + '/'
+    return path
+
 # Set default values
 
 db_type = 'sqlite'
@@ -43,3 +50,8 @@ min_age = environment_variable_int('MIN_AGE', min_age)
 user_agent = environment_variable('USER_AGENT', user_agent)
 
 extensions = environment_variable_list('EXTENSIONS', extensions)
+
+# Clean up variables
+
+internal_base_url = clean_uri_path(internal_base_url)
+public_base_url = clean_uri_path(public_base_url)

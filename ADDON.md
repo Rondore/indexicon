@@ -33,7 +33,7 @@ customBluprint = Blueprint('addon', __name__, template_folder='templates')
 app.register_blueprint(customBluprint, url_prefix='/addon')
 
 # route must have the relative url with the first slash
-@app.route('/about')
+@app.route(settings.internal_base_url + 'about')
 def about():
     output = header('')
     output += '<h1>About ' + settings.name + '</h1>'

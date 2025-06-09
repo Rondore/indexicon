@@ -13,7 +13,7 @@ from flask import request
 from urllib.parse import unquote
 from os import path
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path = settings.internal_base_url + 'static')
 
 scraper = Scraper(FileLogger('scrape'))
 
@@ -103,7 +103,7 @@ def passover_table(db: DbBackend) -> str:
     db.for_each_passover(-1, add_entry, False)
     return render_template('passover_table.html', entries=entries)
 
-@app.route("/")
+@app.route(settings.internal_base_url)
 def home():
     db = database.get_db()
     search_content = ''
@@ -187,7 +187,7 @@ def process_admin_post(form, db: DbBackend) -> str:
         return disable_source(form['disable'], db)
     return ''
 
-@app.route("/admin", methods=['GET', 'POST'])
+@app.route(settings.internal_base_url + "admin", methods=['GET', 'POST'])
 def admin():
     db = database.get_db()
     output = ''
