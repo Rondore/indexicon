@@ -31,7 +31,7 @@ INDEXICON_DB_DB        db_db
 INDEXICON_DB_USER      db_user
 INDEXICON_DB_PASSWORD  db_password
 INDEXICON_DB_HOST      db_host
-INDEXICON_DB_POOL
+INDEXICON_DB_POOL      db_pool
 
 INDEXICON_NAME         name
 INDEXICON_INTERNAL_URL internal_base_url
