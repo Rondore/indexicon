@@ -1,6 +1,22 @@
 @import url("https://fonts.googleapis.com/css2?family=Signika:wght@300;400;600;700&display=swap");
 
 html {
+  --one-pixel: 1px;
+}
+@media (min-resolution: 2dppx) {
+  html {--one-pixel:.5px;}
+}
+@media (min-resolution: 3dppx) {
+  html {--one-pixel:.34px;}
+}
+@media (min-resolution: 4dppx) {
+  html {--one-pixel:.25px;}
+}
+@media (min-resolution: 6dppx) {
+  html {--one-pixel:.17px;}
+}
+
+html {
   font-family: 'Signika', sans-serif;
   background: #EEE;
 }
@@ -168,7 +184,7 @@ nav a.current {
   .source-table td.source-action form i {
     padding: 7px;
     margin: 2px;
-    border: 0.5px solid;
+    border: var(--one-pixel) solid;
     border-radius: 5px;
   }
   .source-table .last-scrape {
