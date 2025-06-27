@@ -25,9 +25,12 @@ def full_download(url, destination=':::'):
         else:
             file_name = link.split('/')[-1]
             source = url + file_name
-            target = destination + file_name
+            target = destination + '/' + file_name
             print('Downloading ' + source + ' to ' + target)
-            wget.download(source, target)
+            try:
+                wget.download(source, target)
+            except:
+                print("Failed to download " + url)
 
 if __name__ == '__main__':
     count = len(sys.argv)
