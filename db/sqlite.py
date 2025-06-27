@@ -4,13 +4,14 @@ import settings
 from db.db_backend import DbBackend
 import sqlite3
 from sqlite3 import Cursor
+from util import install_path
 
 def get_new_connection():
     """
     Cet a connected SQLite connection.
     """
     host = settings.db_host
-    return sqlite3.connect('data/' + host, check_same_thread=False)
+    return sqlite3.connect(install_path + '/data/' + host, check_same_thread=False)
 
 class SqLite(DbBackend):
     def __init__(self):
