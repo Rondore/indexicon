@@ -66,6 +66,7 @@ You should now be able to access the service in your browser at `localhost:8080`
 ```bash
 sudo apt-get install python3-dev default-libmysqlclient-dev build-essential
 git clone 'https://github.com/Rondore/indexicon.git'
+cd indexicon
 python3 -m venv venv
 ./venv/bin/pip3 install -r requirements.txt
 ```
@@ -205,3 +206,31 @@ We can set folders to skip during a scrape. This can be important if the server 
 ## Search
 
 The search field is a basic search. It locates files that contain every word in the search. The search is case insensitive. The only advanced search feature included is the minus word feature. To exclude files that contain a word, enter a minus with the word imediately afterwords like this: `cat gif -thumbnail`
+
+## Running Recursive Downloads
+
+If you want to download all the files in an open directy (or just a folder of it) you can supply the url to a built in script. This can only be done from the terminal.
+
+### Download (installed from source)
+
+First navigate to the folder you want save the files in. Then activate the python environment. This step does not need to be repeated between downloads as long as the shell stays running. You will need to use the path where you installed indexicon.
+
+```bash
+source /home/user/indexicon/venv/bin/activate
+```
+
+Now navigate to the download directory. Then enter the path of the download script and the url to download from:
+
+```bash
+/home/user/indexicon/full_download.py 'http://example.com/cat-memes/'
+```
+
+### Download (docker)
+
+When using a docker instance of indexicon, you will need to mount an extra download folder to run recursive downloads. Once the download mount is set up run something like `docker exec -it indexicon bash` to start a shell. Then navigate to your download directory.
+
+Now just enter the path of the download script and the url to download from:
+
+```bash
+/usr/src/app/full_download.py 'http://example.com/cat-memes/'
+```
