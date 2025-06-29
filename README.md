@@ -23,7 +23,11 @@ Next, lets set up our docker service file. Start by downloading the default one 
 curl 'https://raw.githubusercontent.com/Rondore/indexicon/refs/heads/master/docker-compose.yaml' > ~/.config/indexicon/docker-compose.yaml
 ```
 
-Now you can configure the options in the `docker-compose.yaml` file with a text editor. The options are set in the `enviroment:` section. Each option is detailed in the Configuration section below. Each value name in the configuration file aligns with the following setting:
+Now you can configure the options in the `docker-compose.yaml` file with a text editor.
+
+### Environment Options
+
+The options are set in the `enviroment:` section. Each option is detailed in the Configuration section below. Any settings you set here will override any settings you set in `data/settings.py`. Each value name in the configuration file aligns with the following setting:
 
 ```
 INDEXICON_DB_TYPE      db_type
@@ -45,9 +49,15 @@ INDEXICON_EXTENSIONS   extensions
 
 All configuration values are set as the Configuration describes except for `INDEXICON_EXTENSIONS` which uses a pipe-seperated list like this: `"doc|docx"`
 
+### Network Port
+
 If you want to run the service on the standard http port 80, change `127.0.0.1:8080:80` to `127.0.0.1:80:80`. If you want to be able to reach the service from other devices on your network, change `127.0.0.1` to `0.0.0.0`.
 
-Any settings you set in the docker compose file will override any settings you set in `data/settings.py`.
+### Volumes
+
+In the `volumes:` section, change the file paths before the `:` to match paths on your local system. The data folder holds your settings and database (when using SQLite3). The download folder is only used when using the `full_download.py` script (see below). The addon folder is used if you want to customize the interface. If you are using the stock interface, the addon volume can be removed.
+
+### Starting the container
 
 Once your configuration is saved, you can `cd` into the directory containing the compose file and launch it with one of the following commands depending on which version of docker you are running:
 
@@ -227,10 +237,26 @@ Now navigate to the download directory. Then enter the path of the download scri
 
 ### Download (docker)
 
-When using a docker instance of indexicon, you will need to mount an extra download folder to run recursive downloads. Once the download mount is set up run something like `docker exec -it indexicon bash` to start a shell. Then navigate to your download directory.
+When using a docker instance of indexicon, make sure you've setup the download volume as described above.
 
 Now just enter the path of the download script and the url to download from:
 
 ```bash
-/usr/src/app/full_download.py 'http://example.com/cat-memes/'
+docker exec -it indexicon ./full_download.py  'http://example.com/cat-memes/'
 ```
+
+### Script Arguments
+
+The `full_download.py` script accepts up to three options.
+
+* `--all-files` (optional)
+
+When this options is set, all files in the target folder will be downloaded, ignoring anything set in `extensions` setting.
+
+* target url
+
+The first argument that does not start with a dash is the URL directory you want to download. It is recommended to always specify this argument in quotes.
+
+* download destination (optional)
+
+The second argument that does not start with a dash is the local directory you would like to download into. By default it will download into the current working directory. However, in docker it will default to downloading into the download volume. Use caution when setting this argument in docker; the docker container has it's own filesystem.

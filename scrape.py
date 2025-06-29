@@ -18,7 +18,7 @@ custom_headers = {
     'User-Agent': settings.user_agent,
 }
 
-def get_url_links(url):
+def get_url_links(url, filter_filetypes=True):
     """
     Scrape the links from a URL.
     """
@@ -31,7 +31,7 @@ def get_url_links(url):
         if type(link) is not str:
            print('dead link object:' + str(link))
            continue
-        if not is_good_filetype(link):
+        if filter_filetypes and not is_good_filetype(link):
             continue
         full_link = get_full_url(url, link)
         if len(url) >= len(full_link):

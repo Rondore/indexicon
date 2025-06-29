@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   indexicon:
-    image: rondore/indexicon:latest
+    image: c854f2c5546c
     hostname: indexicon
     container_name: indexicon
     ports:
@@ -9,6 +9,7 @@ services:
     volumes:
       - "/home/user/.config/indexicon/addon:/usr/src/app/addon"
       - "/home/user/.config/indexicon/data:/usr/src/app/data"
+      - "/home/user/Downloads/indexicon:/usr/src/app/download"
     restart: always
     environment:
       INDEXICON_DB_TYPE: "sqlite"

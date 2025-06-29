@@ -4,6 +4,7 @@ import math
 import os
 
 install_path = os.path.dirname(os.path.realpath(__file__)) + '/'
+is_docker = os.path.isfile('/.dockerenv')
 
 def pretty_age(age: int) -> str:
     """
