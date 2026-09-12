@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   indexicon:
-    image: c854f2c5546c
+    image: rondore/indexicon:latest
     hostname: indexicon
     container_name: indexicon
     ports:
