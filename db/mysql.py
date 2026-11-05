@@ -46,5 +46,5 @@ class MySql(DbBackend):
     def close(self):
         self.db.close()
 
-    def get_concat(str1, str2) -> str:
+    def get_concat(self, str1, str2) -> str:
         return 'CONCAT(' + str1 + ', ' + str2 + ')'

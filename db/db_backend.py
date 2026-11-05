@@ -34,7 +34,7 @@ class DbBackend(ABC):
         pass
 
     @abstractmethod
-    def get_concat(str1, str2) -> str:
+    def get_concat(self, str1, str2) -> str:
         pass
 
     def update_scrape_stamp(self, id: int) -> None:
