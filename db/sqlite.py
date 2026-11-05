@@ -57,3 +57,6 @@ class SqLite(DbBackend):
     def close(self):
         # self.db.close()
         pass
+
+    def get_concat(str1, str2) -> str:
+        return str1 + ' || ' + str2

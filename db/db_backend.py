@@ -33,6 +33,10 @@ class DbBackend(ABC):
     def close(self):
         pass
 
+    @abstractmethod
+    def get_concat(str1, str2) -> str:
+        pass
+
     def update_scrape_stamp(self, id: int) -> None:
         query = 'UPDATE `source` SET `s_last_crawl`=' + self.unix_time() + ' WHERE `s_id`=' + str(id)
         self.execute_and_close(query)
@@ -184,7 +188,8 @@ class DbBackend(ABC):
     
     def add_passover(self, url: str):
         standin = self.stand_in_string()
-        cursor = self.execute_and_return('SELECT `s_id`, `s_url` FROM source WHERE ' + standin + ' like `s_url` || "%";', (url,))
+        concat = self.get_concat('`s_url`', '"%"')
+        cursor = self.execute_and_return('SELECT `s_id`, `s_url` FROM source WHERE ' + standin + ' like ' + concat + ';', (url,))
         row = cursor.fetchone()
         id = -1
         source_url = ''
